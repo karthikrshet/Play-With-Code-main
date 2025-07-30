@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Google Form with Timer</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* Fixed Menu bar styling */
+        .navbar {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 10; /* Make sure the menu stays above other elements */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Timer styling */
+        .timer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e74c3c;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        /* Logout button 3D styling */
+        .logout-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #f39c12;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: fixed; /* Position it at a fixed location */
+    top: 10px; /* Distance from the top */
+    left: 10px; /* Distance from the left */
+    z-index: 1000; /* Ensure it stays on top of other elements */
+}
+
+.logout-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.logout-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+
+        /* Form container styling */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 80px; /* Space for the menu */
+        }
+
+        iframe {
+            border: none;
+            width: 640px;
+            height: 1634px;
+            margin-top: 20px;
+        }
+
+        /* Warning message styling */
+        .warning-message {
+            background-color: #f39c12;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            margin: 20px;
+            border-radius: 5px;
+            display: none; /* Hide by default */
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        /* Additional styles for readability */
+        h1 {
+            color: #333;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555;
+        }
+        .scrolling-text {
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden; /* Hide anything outside the container */
+             width: 100%;  
+            box-sizing: border-box;
+        }
+
+        .scrolling-text span {
+            display: inline-block;
+            animation: scroll-left 20s linear infinite; /* Adjust speed with the duration */
+        }
+
+        /* Define the scrolling animation */
+        @keyframes scroll-left {
+            from {
+                transform: translateX(100%); /* Start off-screen to the right */
+            }
+            to {
+                transform: translateX(-100%); /* Move to off-screen to the left */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation bar -->
+<div class="navbar">
+    <h1>Survey Form</h1>
+    <!-- Logout button -->
+    <button class="logout-button" onclick="logout()">Logout</button>
+</div>
+
+<!-- Timer on the top-right corner -->
+<div class="timer" id="timer">40:00</div>
+
+<!-- Form container -->
+     
+<div class="container">
+    <h1>Aptitude</h1>
+    <p>Please fill out the form below. You have 40 minutes to complete it.</p>
+    <div class="scrolling-text" >
+        <span style="color: red;">1. Do not switch between tab, it may caues to disqualify from the event,
+            2. Do not refresh the page, it may caues to lose the whole form data </span>
+    </div>
+    <p id="msg"></p>
+    <!-- <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSc71nRVnB3Rp7BDT6uT8aDeUCHwK8aHIIJnKX_c7q3F1UQ-Yw/viewform?embedded=true" width="640" height="7033" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe> -->
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdb8FarbDTvNJRgCSIC4C5PkNTj2I2Fn5Hrak755B9TmXfNtg/viewform?embedded=true" width="640" height="14357" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+</div>
+
+<!-- Warning message -->
+<div class="warning-message" id="warningMessage">
+    You have switched away from the form. Please return to complete it.
+</div>
+
+<script>
+    let timeLeft = 2400; // 40 minutes
+    const timerElement = document.getElementById('timer');
+    const iframe = document.getElementById('googleForm');
+    const warningMessage = document.getElementById('warningMessage');
+
+    // Function to update the timer display
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+        timeLeft--;
+
+        updateTimer();
+
+        if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            alert("Time is up! Submit the form.");
+        }
+    }, 1000);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            warningMessage.style.display = 'block';
+        } else {
+            warningMessage.style.display = 'block';
+        }
+    });
+
+    // Logout function
+    function logout() {
+        alert('You have been logged out.');
+        // Redirect to a login page or home page
+        window.location.href = "index.html"; // Replace with your logout URL
+    }
+</script>
+
+</body>
+</html>

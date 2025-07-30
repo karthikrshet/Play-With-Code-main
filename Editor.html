@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .editor-container {
+            width: 95%;
+            max-width: 1400px;
+            height: max-content;
+            background-color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+         
+            position: relative;
+        }
+
+        .editor-section-wrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .editor-section {
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            color: #ddd;
+            width: 32%;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .editor-section textarea {
+            width: 100%;
+            height: 100%;
+            background: #222;
+            color: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            padding: 10px;
+            outline: none;
+            resize: none;
+        }
+
+        .editor-section textarea:focus {
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.7);
+        }
+
+        .output-section {
+            background: #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            color: #fff;
+            height: 500px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+           
+        }
+
+        .out {
+            width: 100%;
+            height: 100%;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            position: absolute;
+           top:1px;
+            right: 30px;
+        }
+
+        .run-button,
+        .stop-button {
+            background: #00d4ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease;
+        }
+
+        .run-button:hover,
+        .stop-button:hover {
+            background: #00a3b8;
+        }
+
+        .run-button:focus,
+        .stop-button:focus {
+            outline: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #timer {
+            position: absolute;
+            top: 3px;
+            left: 10px;
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+        }
+
+         /* Create a scrolling effect using CSS */
+         .scrolling-text {
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden; /* Hide anything outside the container */
+             width: 100%;  
+            box-sizing: border-box;
+        }
+
+        .scrolling-text span {
+            display: inline-block;
+            animation: scroll-left 20s linear infinite; /* Adjust speed with the duration */
+        }
+
+        /* Define the scrolling animation */
+        @keyframes scroll-left {
+            from {
+                transform: translateX(100%); /* Start off-screen to the right */
+            }
+            to {
+                transform: translateX(-100%); /* Move to off-screen to the left */
+            }
+        }
+        .logo {
+    color: black;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #00c3ff;
+    text-shadow:10 0 0 11px #000000;
+}
+    </style>
+     <script>
+        // Display a confirmation prompt when the user tries to refresh or leave the page
+        window.addEventListener('beforeunload', function (event) {
+            // Standard message for the confirmation dialog
+            const message = "Are you sure you want to leave? Any unsaved changes will be lost.";
+
+            // Display the confirmation dialog
+            event.returnValue = message; // For most browsers
+            return message; // For legacy browsers
+        });
+    </script>
+</head>
+<body>
+
+    <div class="logo" data-aos="zoom-in" data-aos-duration="1500">
+        Play with<span>   Code</span>
+    </div>
+
+    <div class="scrolling-text" >
+        <span style="color: red;">1. Do not switch between tab, it may caues to disqualify from the event,
+            2. Do not refresh the page, it may caues to lose the whole content. </span>
+    </div>
+   
+
+<div class="editor-container">
+    <div class="editor-section-wrapper">
+        <!-- HTML Editor -->
+        <div class="editor-section">
+            <h3 style="color: #fff;">HTML</h3>
+            <textarea id="htmlCode" placeholder="Write your HTML code here" spellcheck="false"></textarea>
+        </div>
+
+        <!-- CSS Editor -->
+        <div class="editor-section">
+            <h3 style="color: #fff;">CSS</h3>
+            <textarea id="cssCode" placeholder="Write your CSS code here" spellcheck="false"></textarea>
+        </div>
+
+        <!-- JavaScript Editor -->
+        <div class="editor-section">
+            <h3 style="color: #fff;">JavaScript</h3>
+            <textarea id="jsCode" placeholder="Write your JavaScript code here" spellcheck="false"></textarea>
+        </div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="out">
+        <div class="output-section">
+            <iframe id="output"></iframe>
+        </div>
+    </div>
+
+    <!-- Timer Display -->
+    
+    <div id="timer">Time remaining: 70m 0s</div>
+
+    <!-- Button Container -->
+    <div class="button-container">
+        <button class="stop-button" onclick="stopTimer()">Stop Timer</button>
+    </div>
+</div>
+
+<script>
+    let timerDuration = 70;  // Set timer duration to 2 hours (120 minutes)
+    let timerInterval;
+    let timeLeft = timerDuration * 60;  // Convert minutes to seconds
+
+    // Function to start the timer
+    function startTimer() {
+        const timerDisplay = document.getElementById('timer');
+        timerInterval = setInterval(function () {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                disableTextareas();
+                timerDisplay.textContent = "Time's up!";
+            } else {
+                // Format the timer to display minutes and seconds
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `Time remaining: ${minutes}m ${seconds}s`;
+                timeLeft--;
+            }
+        }, 1000);
+    }
+
+    // Function to stop the timer and disable textareas
+    function stopTimer() {
+        clearInterval(timerInterval);
+        disableTextareas();
+        const timerDisplay = document.getElementById('timer');
+        timerDisplay.textContent = `Time remaining: ${minutes}m ${seconds}s`;
+    }
+
+    // Function to disable textareas
+    function disableTextareas() {
+        document.getElementById('htmlCode').disabled = true;
+        document.getElementById('cssCode').disabled = true;
+        document.getElementById('jsCode').disabled = true;
+    }
+
+    // Function to run the code
+    function runCode() {
+        // Get HTML, CSS, and JS from the textareas
+        const html = document.getElementById('htmlCode').value;
+        const css = document.getElementById('cssCode').value;
+        const js = document.getElementById('jsCode').value;
+
+        // Create an iframe to display the output
+        const iframe = document.getElementById('output');
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+        // Write the combined code into the iframe
+        iframeDoc.open();
+        iframeDoc.write(`
+            <html lang="en">
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>
+                    ${html}
+                    <script>${js}<\/script>
+                </body>
+            </html>
+        `);
+        iframeDoc.close();
+    }
+
+    // Function to handle the visibility change event
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            // Save current content of the textareas to localStorage when the tab is switched
+            localStorage.setItem('htmlCode', document.getElementById('htmlCode').value);
+            localStorage.setItem('cssCode', document.getElementById('cssCode').value);
+            localStorage.setItem('jsCode', document.getElementById('jsCode').value);
+        } else {
+            // Clear the content when the user revisits the page but keep the output intact
+            // localStorage.removeItem('htmlCode');
+            // localStorage.removeItem('cssCode');
+            // localStorage.removeItem('jsCode');
+            document.getElementById('htmlCode').disabled = true;
+        document.getElementById('cssCode').disabled = true;
+        document.getElementById('jsCode').disabled = true;
+        stopTimer()
+            // document.getElementById('htmlCode').value = '';
+            // document.getElementById('cssCode').value = '';
+            // document.getElementById('jsCode').value = '';
+
+        }
+    }
+
+    // Start the timer automatically as soon as the page loads
+    window.onload = function() {
+       startTimer();
+        // Handle visibility change
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // Load the saved code from localStorage when the page loads (without clearing the output)
+        const savedHtml = localStorage.getItem('htmlCode');
+        const savedCss = localStorage.getItem('cssCode');
+        const savedJs = localStorage.getItem('jsCode');
+        
+        if (savedHtml !== null) document.getElementById('htmlCode').value = savedHtml;
+        if (savedCss !== null) document.getElementById('cssCode').value = savedCss;
+        if (savedJs !== null) document.getElementById('jsCode').value = savedJs;
+
+                    document.getElementById('htmlCode').value = '';
+            document.getElementById('cssCode').value = '';
+            document.getElementById('jsCode').value = '';
+
+        
+        // Run the saved code
+        runCode();
+    };
+
+    // Add event listeners to automatically run the code when content changes in any of the editors
+    document.getElementById('htmlCode').addEventListener('input', runCode);
+    document.getElementById('cssCode').addEventListener('input', runCode);
+    document.getElementById('jsCode').addEventListener('input', runCode);
+
+    // Disable paste event on the textareas
+    function preventPaste(event) {
+        event.preventDefault();
+    }
+
+    // Attach the prevent paste event to all text areas
+     document.getElementById('htmlCode').addEventListener('paste', preventPaste);
+     document.getElementById('cssCode').addEventListener('paste', preventPaste);
+     document.getElementById('jsCode').addEventListener('paste', preventPaste);
+
+</script>
+
+</body>
+</html>
